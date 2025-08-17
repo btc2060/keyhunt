@@ -1,8 +1,8 @@
 /*
-Develop by Alberto
-email: albertobsd@gmail.com
+Develop by Alberto ，由光头强改进汉化
+email: amos_wong@outlook.com.com
 */
-
+#include <qrencode.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -122,7 +122,7 @@ char *raw_baseminikey = NULL;
 char *minikeyN = NULL;
 int minikey_n_limit;
 	
-const char *version = "0.2.230519 Satoshi Quest";
+const char *version = "1.1.20250520 比特币谜题";
 
 #define CPU_GRP_SIZE 1024
 
@@ -132,6 +132,7 @@ Point _2Gn;
 std::vector<Point> GSn;
 Point _2GSn;
 
+void print_qrcode(const char* data, int version);
 void menu();
 void init_generator();
 
@@ -484,10 +485,15 @@ int main(int argc, char **argv)	{
 	
 	
 	
-	printf("[+] Version %s, developed by AlbertoBSD\n",version);
+	printf("[+] Version %s, By 光头强 改版\n",version);
 
-	while ((c = getopt(argc, argv, "deh6MqRSB:b:c:C:E:f:I:k:l:m:N:n:p:r:s:t:v:G:8:z:")) != -1) {
+	while ((c = getopt(argc, argv, "wdeh6MqRSB:b:c:C:E:f:I:k:l:m:N:n:p:r:s:t:v:G:8:z:")) != -1) {
 		switch(c) {
+			case 'w':
+				printf("扫描以下二维码添加微信获取技术支持：\n");
+            			print_qrcode("https://u.wechat.com/MJy5npXeUE8jicTsNgLY7-k", 4);  // 生成二维码
+				return 0;
+			break;
 			case 'h':
 				menu();
 			break;
@@ -5738,37 +5744,61 @@ void sha256sse_23(uint8_t *src0, uint8_t *src1, uint8_t *src2, uint8_t *src3, ui
   sha256sse_1B(b0, b1, b2, b3, dst0, dst1, dst2, dst3);
 }
 
+// 移除未使用的useSingleChar参数，修正指针类型
+void print_qrcode(const char* data, int version = 0) {
+    // 生成二维码（正方形，宽高相等）
+    QRcode* qr = QRcode_encodeString(data, version, QR_ECLEVEL_L, QR_MODE_8, 1);
+    if (!qr) {
+        fprintf(stderr, "二维码生成失败\n");
+        return;
+    }
+    // 打印二维码：每个模块用两个字符（横向扩展），补偿终端高宽比
+    for (int y = 0; y < qr->width; y++) {
+        printf("  ");  // 左缩进
+        for (int x = 0; x < qr->width; x++) {
+            // 修正：使用const char*接收常量字符串
+            const char* block = (qr->data[y * qr->width + x] & 1) ? "██" : "  ";
+            printf("%s", block);
+        }
+        printf("\n");
+    }
+
+    QRcode_free(qr);
+}
+
 void menu() {
-	printf("\nUsage:\n");
-	printf("-h          show this help\n");
-	printf("-B Mode     BSGS now have some modes <sequential, backward, both, random, dance>\n");
-	printf("-b bits     For some puzzles you only need some numbers of bits in the test keys.\n");
-	printf("-c crypto   Search for specific crypto. <btc, eth> valid only w/ -m address\n");
-	printf("-C mini     Set the minikey Base only 22 character minikeys, ex: SRPqx8QiwnW4WNWnTVa2W5\n");
-	printf("-8 alpha    Set the bas58 alphabet for minikeys\n");
-	printf("-e          Enable endomorphism search (Only for address, rmd160 and vanity)\n");
-	printf("-f file     Specify file name with addresses or xpoints or uncompressed public keys\n");
-	printf("-I stride   Stride for xpoint, rmd160 and address, this option don't work with bsgs\n");
-	printf("-k value    Use this only with bsgs mode, k value is factor for M, more speed but more RAM use wisely\n");
-	printf("-l look     What type of address/hash160 are you looking for <compress, uncompress, both> Only for rmd160 and address\n");
-	printf("-m mode     mode of search for cryptos. (bsgs, xpoint, rmd160, address, vanity) default: address\n");
-	printf("-M          Matrix screen, feel like a h4x0r, but performance will dropped\n");
-	printf("-n number   Check for N sequential numbers before the random chosen, this only works with -R option\n");
-	printf("            Use -n to set the N for the BSGS process. Bigger N more RAM needed\n");
-	printf("-q          Quiet the thread output\n");
-	printf("-r SR:EN    StarRange:EndRange, the end range can be omitted for search from start range to N-1 ECC value\n");
-	printf("-R          Random, this is the default behavior\n");
-	printf("-s ns       Number of seconds for the stats output, 0 to omit output.\n");
-	printf("-S          S is for SAVING in files BSGS data (Bloom filters and bPtable)\n");
-	printf("-6          to skip sha256 Checksum on data files");
-	printf("-t tn       Threads number, must be a positive integer\n");
-	printf("-v value    Search for vanity Address, only with -m vanity\n");
-	printf("-z value    Bloom size multiplier, only address,rmd160,vanity, xpoint, value >= 1\n");
+	printf("\n命令说明:\n");
+	printf("-h          显示此帮助信息\n");
+	printf("-w          命令行显示微信二维码，添加后获取技术支持");
+	printf("-B 模式     BSGS 目前支持多种模式 <sequential（顺序）, backward（反向）, both（双向）, random（随机）, dance（交替）>\n");
+	printf("-b 位数     对于某些谜题，你只需测试密钥中的特定位数\n");
+	printf("-c 加密货币 搜索特定加密货币。<btc（比特币）, eth（以太坊）> 仅在配合 -m address 时有效\n");
+	printf("-C 迷你密钥 设置迷你密钥的基准（仅22字符的迷你密钥，例如：SRPqx8QiwnW4WNWnTVa2W5）\n");
+	printf("-8 字母表   为迷你密钥设置 base58 编码的字母表\n");
+	printf("-e          启用自同态搜索（仅适用于地址、rmd160 和 vanity 模式）\n");
+	printf("-f 文件     指定包含地址、xpoint 或未压缩公钥的文件名\n");
+	printf("-I 步长     xpoint、rmd160 和 address 模式的步长，此选项与 bsgs 模式不兼容\n");
+	printf("-k 值       仅用于 bsgs 模式，k 值是 M 的系数，值越大速度越快但占用内存越多，请谨慎使用\n");
+	printf("-l 类型     你要查找的地址/hash160 类型 <compress（压缩）, uncompress（未压缩）, both（两者）> 仅适用于 rmd160 和 address 模式\n");
+	printf("-m 模式     加密货币搜索模式。（bsgs、xpoint、rmd160、address、vanity）默认：address\n");
+	printf("-M          矩阵屏幕效果，有种黑客的感觉，但会降低性能\n");
+	printf("-n 数量     在随机选择前检查 N 个连续数字，仅配合 -R 选项有效\n");
+	printf("            使用 -n 为 BSGS 过程设置 N 值。N 越大，需要的内存越多\n");
+	printf("-q          静默线程输出（不显示线程相关信息）\n");
+	printf("-r 起始:结束 起始范围:结束范围，可省略结束范围，表示从起始范围搜索到 N-1 的 ECC 值\n");
+	printf("-R          随机模式，这是默认行为\n");
+	printf("-s 秒数     统计信息输出的间隔秒数，0 表示不输出\n");
+	printf("-S          S 代表将 BSGS 数据（布隆过滤器和 bPtable）保存到文件\n");
+	printf("-6          跳过数据文件的 sha256 校验和\n");
+	printf("-t 线程数   线程数量，必须是正整数\n");
+	printf("-v 内容     搜索 vanity 地址（个性地址），仅配合 -m vanity 模式使用\n");
+	printf("-z 值       布隆过滤器大小的乘数，仅适用于 address、rmd160、vanity、xpoint 模式，值 >= 1\n");
 	printf("\nExample:\n\n");
 	printf("./keyhunt -m rmd160 -f tests/unsolvedpuzzles.rmd -b 66 -l compress -R -q -t 8\n\n");
 	printf("This line runs the program with 8 threads from the range 20000000000000000 to 40000000000000000 without stats output\n\n");
-	printf("Developed by AlbertoBSD\tTips BTC: 1Coffee1jV4gB5gaXfHgSHDz9xx9QSECVW\n");
-	printf("Thanks to Iceland always helping and sharing his ideas.\nTips to Iceland: bc1q39meky2mn5qjq704zz0nnkl0v7kj4uz6r529at\n\n");
+	printf("Developed by 光头强\tTips BTC: 1GuangTouQiang1XfHgSHDz9xx9QSECVW\n");
+	printf("感谢albertobsd的开源代码.\nTips to albertobsd: 1Coffee1jV4gB5gaXfHgSHDz9xx9QSECVW\n");
+	printf("喜结善缘、幸运相伴。你一定行！\n\n");
 	exit(EXIT_FAILURE);
 }
 
