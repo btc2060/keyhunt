@@ -1,3 +1,6 @@
+#汉化界面，增加功能
+
+显示二维码、自动发送结果到邮箱、获取并破解指定范围的谜题私钥
 # keyhunt
 
 Tool for hunt privatekeys for crypto currencies that use secp256k1 elliptic curve
@@ -1360,3 +1363,4 @@ I also need to make some test in testnet network if you have some Testnet balanc
 Address: msKcxhizYWVvxCACFEG4GCSK1xYrEkib5A
 
 Thank you.
+
